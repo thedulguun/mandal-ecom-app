@@ -1,0 +1,477 @@
+# Mandal Extension Chat History - 2025-12-04
+
+## PROJECT OVERVIEW
+Chrome extension for Instagram DM management with order tracking, draft system, canned message shortcuts, and ebuuhia delivery integration.
+
+## KEY FILES
+- contentScript.js: Main UI logic, modals, order/draft management
+- content.css: Extension styling, visual feedback
+- background.js: Service worker for Supabase API requests and ebuuhia API integration
+
+## WORK COMPLETED TODAY (2025-12-04)
+
+### 1. Settings Modal - Password Visibility Toggle
+**Location**: contentScript.js (lines 642-763)
+
+**Changes**:
+- Removed "Extension Info" section (Version, Extension name, Status)
+- Added password visibility toggle button with eye icon (👁️)
+- Toggle positioned absolutely at right of password field
+- Changes icon to 🙈 when password is visible
+- Added proper event handler for toggle functionality
+
+**Code**:
+```javascript
+// Password field now wrapped in relative div
+<div style="position: relative;">
+  <input id="modal-ebuuhia-password" type="password" placeholder="••••••••" value="${credentials.password || ''}" style="padding-right: 40px;" />
+  <button id="toggle-password-visibility" type="button" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px 8px; color: #6b7280; transition: color 0.2s;">👁️</button>
+</div>
+
+// Event listener added after modal mount (lines 732-743)
+const toggleBtn = modal.querySelector("#toggle-password-visibility");
+const passwordInput = modal.querySelector("#modal-ebuuhia-password");
+toggleBtn.addEventListener("click", () => {
+  if (passwordInput.type === "password") {
+    passwordInput.type = "text";
+    toggleBtn.textContent = "🙈";
+  } else {
+    passwordInput.type = "password";
+    toggleBtn.textContent = "👁️";
+  }
+});
+```
+
+### 2. Items UI Layout Fix
+**Location**: content.css (lines 872-950)
+
+**Problem**: Item name field was too narrow, layout not aligned with rest of form
+
+**Solution**: Changed from flexbox to CSS Grid layout
+
+**Changes**:
+```css
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.item-row {
+  display: grid;
+  grid-template-columns: 1fr 70px 32px;  /* Item name, quantity, remove button */
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.item-name {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1f2937;
+  background: #ffffff;
+  box-sizing: border-box;
+  width: 100%;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.item-name:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.item-quantity {
+  padding: 10px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1f2937;
+  background: #ffffff;
+  box-sizing: border-box;
+  text-align: center;
+  width: 100%;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.item-remove-btn {
+  width: 32px;
+  height: 32px;
+  background: #ef4444;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+```
+
+**Key improvements**:
+- Grid layout with 3 columns: 1fr (flexible item name), 70px (quantity), 32px (remove button)
+- Proper sizing and alignment with other form fields
+- Consistent padding (10px-12px) and border-radius (6px)
+- Blue focus states matching other inputs
+- Remove button slightly larger (32px) for better clickability
+
+## PREVIOUS WORK (from 2025-12-03)
+
+### Modal Improvements Completed
+1. **Shortcuts Persistence** - Fixed async/await pattern in loadCannedResponses()
+2. **Modal Text Contrast** - Changed colors from #6b7280 to #1f2937 and #374151
+3. **Current Draft Button Selection** - Added .selected class with blue background
+4. **Order List Display** - Swapped date/order_id, made date bold
+5. **Current Draft Auto-select on Refresh** - Added updateActionButtons() call
+6. **Custom Delete Modal** - Created showDeleteConfirmationModal() with order details
+7. **Enter Key Support** - Added Enter key handlers to modals
+
+## CURRENT STATE
+
+### Modals in System
+1. **showOrderConfirmationModal(orderData)** - Lines 184-286
+   - Shows order summary before creating order
+   - Displays: name, phone, phone1, address, item count
+   - Enter = confirm, Esc = cancel
+
+2. **showDeliveryConfirmationModal(orderData)** - Lines 288-394
+   - Shows full order details before creating delivery
+   - Displays: order_id, name, phone, phone1, address, full item list with quantities
+   - Enter = confirm, Esc = cancel
+
+3. **showDeleteConfirmationModal(orderData)** - Lines 321-407 (approx)
+   - Custom delete confirmation with order details
+   - Enter = CANCEL (safe default), mouse click = delete
+
+4. **showSettingsModal()** - Lines 642-763
+   - Ebuuhia credentials (email/password with visibility toggle)
+   - Keyboard shortcuts guide
+   - Enter = save, Esc = cancel
+
+### Settings Modal Details
+**Current structure**:
+- Section 1: Ebuuhia Delivery Integration
+  - Email input
+  - Password input with visibility toggle (👁️/🙈)
+  - Helper text about local storage
+- Section 2: Keyboard Shortcuts
+  - Ctrl+Enter = Save current order
+  - Esc = Close modals
+  - Enter = Confirm actions
+
+**Storage**:
+```javascript
+chrome.storage.local: {
+  ebuuhiaCredentials: {
+    email: "user@example.com",
+    password: "user_password"
+  }
+}
+```
+
+### Items UI Details
+**HTML Structure** (generated in contentScript.js):
+```html
+<div class="item-row" data-item-index="0">
+  <input type="text" class="item-name" placeholder="Product name" maxlength="100" />
+  <input type="number" class="item-quantity" placeholder="Qty" min="1" value="1" />
+  <button class="item-remove-btn" type="button">×</button>
+</div>
+```
+
+**Data Storage**:
+- Stored in database as JSON string: `[{"name": "Product", "quantity": 2}, ...]`
+- Displayed using addItemRow() function
+- Loaded using loadItemsFromJSON() function
+- Converted to array for ebuuhia API: `[{"name": "Product", "start": 2}, ...]`
+
+## TECHNICAL PATTERNS
+
+### Modal Pattern
+```javascript
+async function showModalName(data) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement("div");
+    overlay.className = "ig-modal-overlay";
+    const modal = document.createElement("div");
+    modal.className = "ig-modal";
+
+    // Build modal content
+    // Add event listeners
+    // Handle keyboard shortcuts
+
+    document.body.appendChild(overlay);
+  });
+}
+```
+
+### Items Management Pattern
+```javascript
+// Add item row
+function addItemRow(panel, name = "", quantity = 1) {
+  const itemsList = panel.querySelector("#ord-items-list");
+  const row = document.createElement("div");
+  row.className = "item-row";
+  row.innerHTML = `...`;
+  // Add event listeners for remove and input
+  itemsList.appendChild(row);
+}
+
+// Get items as JSON for database
+function getItemsJSON(panel) {
+  updateItemsData(panel);
+  return JSON.stringify(itemsData);
+}
+
+// Load items from JSON
+function loadItemsFromJSON(panel, itemsJSON) {
+  const items = JSON.parse(itemsJSON);
+  items.forEach(item => {
+    addItemRow(panel, item.name, item.quantity);
+  });
+}
+```
+
+## EBUUHIA API INTEGRATION (background.js)
+
+### API Endpoint
+```
+POST https://api.ebuuhia.com/api/v1/ebuuhiaApi
+```
+
+### Payload Structure
+```javascript
+{
+  email: "user@example.com",          // Required
+  password: "user_password",          // Required
+  cus_name: "Customer Name",          // Required
+  cus_phone: "12345678",             // Required (8 digits)
+  cus_phone1: "87654321",            // Optional (8 digits)
+  city: "Улаанбаатар",               // Optional
+  district: "Сүхбаатар",             // Optional
+  committee: "4-р хороо",            // Optional
+  address: "Full address",            // Required
+  items: [                            // Required (array)
+    { name: "Product", quantity: 2 }
+  ],
+  deli_desc: "Delivery notes"        // Optional
+}
+```
+
+### Database Update After Success
+When delivery is created successfully:
+```javascript
+{
+  is_delivery_called: true,
+  delivery_created_at: "2025-12-04T10:30:00Z",
+  ebuuhia_response: "{...}"  // JSON stringified response
+}
+```
+
+## CSS CLASSES REFERENCE
+
+### Modal Classes
+- `.ig-modal-overlay` - Modal backdrop
+- `.ig-modal` - Modal container
+- `.ig-modal-header` - Modal header section
+- `.ig-modal-title` - Modal title text
+- `.ig-modal-body` - Modal body content
+- `.ig-modal-footer` - Modal footer with buttons
+- `.ig-modal-btn` - Base button class
+- `.ig-modal-btn-primary` - Blue confirm button
+- `.ig-modal-btn-danger` - Red delete button
+- `.ig-modal-btn-cancel` - Gray cancel button
+
+### Items UI Classes
+- `.items-list` - Container for all item rows
+- `.item-row` - Single item row (grid layout)
+- `.item-name` - Item name input (1fr width)
+- `.item-quantity` - Item quantity input (70px width)
+- `.item-remove-btn` - Remove button (32px width)
+
+### Form Classes
+- `.ig-field` - Form field container
+- `.ig-field label` - Field label
+- `.ig-field input` - Text/email/password/number inputs
+- `.ig-field textarea` - Textarea inputs
+
+### Button Classes
+- `.ig-helper-btn` - Base button class
+- `.ig-btn-primary` - Primary action button (blue)
+- `.ig-btn-secondary` - Secondary action button (white with border)
+- `.selected` - Selected state for buttons
+
+### Order List Classes
+- `.ig-order-row` - Order row in list
+- `.ig-order-row.selected` - Selected order
+- `.ig-order-date` - Order date text
+- `.ig-order-id-text` - Order ID text (monospace)
+
+## KNOWN ISSUES / LIMITATIONS
+
+### Extension Context Invalidation
+When extension is reloaded while Instagram page is open:
+- GET_CANNED error
+- "Cannot read properties of null" errors
+- Ebuuhia API 401 error (if credentials not reloaded)
+
+**Solution**: Reload Instagram page after updating extension
+
+### Phone Number Validation
+- Must be exactly 8 digits for both cus_phone and cus_phone1
+- Converted to integer when sending to ebuuhia API
+- No validation implemented yet (TODO)
+
+## TODO / FUTURE IMPROVEMENTS
+
+### High Priority
+- [ ] Add phone number validation (8 digits) on order form
+- [ ] Add loading state to delivery button during API call
+- [ ] Better error messages for ebuuhia API errors
+- [ ] Test ebuuhia API integration with real account
+
+### Medium Priority
+- [ ] Add retry logic for failed delivery API calls
+- [ ] Add "View in Ebuuhia" link after delivery creation
+- [ ] Capture ebuuhia tracking ID automatically
+- [ ] Add delivery status synchronization
+
+### Low Priority
+- [ ] Add city/district/committee autocomplete suggestions
+- [ ] Add bulk delivery creation for multiple orders
+- [ ] Add delivery cost integration
+- [ ] Update manifest version to 1.1
+
+## DATABASE SCHEMA
+
+### orders table
+```javascript
+{
+  id: integer (primary key),
+  team_id: uuid,
+  order_id: string,              // MND-YYMMDD-XXXXXX-RR
+  ig_username: string | null,
+  ig_thread_id: string | null,
+  cus_name: string | null,
+  cus_phone: string | null,      // 8 digits
+  cus_phone1: string | null,     // 8 digits
+  city: string | null,           // 50 chars
+  district: string | null,       // 50 chars
+  committee: string | null,      // 50 chars
+  address: string | null,        // 250 chars
+  items: text | null,            // JSON string
+  deli_desc: string | null,      // 250 chars
+  is_delivery_called: boolean,   // Default false
+  delivery_created_at: timestamp | null,
+  ebuuhia_response: text | null, // JSON string
+  created_at: timestamp
+}
+```
+
+### customer_drafts table
+```javascript
+{
+  id: integer (primary key),
+  team_id: uuid,
+  ig_thread_id: string,
+  ig_username: string | null,
+  cus_name: string | null,
+  cus_phone: string | null,
+  cus_phone1: string | null,
+  city: string | null,
+  district: string | null,
+  committee: string | null,
+  address: string | null,
+  items: text | null,            // JSON string
+  deli_desc: string | null,
+  updated_at: timestamp
+}
+```
+
+### canned_responses table
+```javascript
+{
+  id: integer (primary key),
+  team_id: uuid,
+  title: string,
+  body: text,
+  category: string | null,
+  is_favorite: boolean,
+  created_by: string,
+  updated_at: timestamp
+}
+```
+
+## GIT STATUS
+Branch: main
+Last commit: 0d614e6 first commit
+
+Modified files:
+- contentScript.js (modals, items UI)
+- content.css (items UI layout, input styling)
+- background.js (ebuuhia API integration)
+
+## IMPORTANT REMINDERS
+
+1. **Always reload Instagram page after extension updates** to avoid context invalidation errors
+
+2. **Modal parameter changes**:
+   - showOrderConfirmationModal() now takes orderData object, not (title, message)
+   - showDeliveryConfirmationModal() is separate function, not reusing order confirmation modal
+
+3. **Items data flow**:
+   - Stored as JSON string in database: `[{"name": "X", "quantity": 1}]`
+   - Converted to array for API: `[{"name": "X", "start": 1}]`
+   - Note the field name change: `quantity` → `start` for ebuuhia API
+
+4. **Settings modal**:
+   - Password field has visibility toggle (no need for separate show/hide button)
+   - Extension Info section removed
+   - Credentials stored in chrome.storage.local, passed to background.js when needed
+
+5. **CSS Grid for items**:
+   - Grid columns: 1fr 70px 32px (name, quantity, remove)
+   - All inputs have box-sizing: border-box
+   - Width: 100% within grid cells
+
+## DEBUGGING TIPS
+
+### Check Extension Context
+```javascript
+console.log('[Mandal Instagram Helper] Extension context valid');
+```
+
+### Check Storage
+```javascript
+chrome.storage.local.get(['ebuuhiaCredentials'], (result) => {
+  console.log('Credentials:', result.ebuuhiaCredentials);
+});
+```
+
+### Check Items Parsing
+```javascript
+console.log('Items JSON:', getItemsJSON(panel));
+const items = JSON.parse(getItemsJSON(panel));
+console.log('Parsed items:', items);
+```
+
+### Check Modal State
+```javascript
+console.log('Modal opened:', document.querySelector('.ig-modal-overlay'));
+```
+
+## END OF SUMMARY
+
+Last updated: 2025-12-04
+Session completed successfully with all requested changes implemented.
+Next session should continue with phone validation and API testing.

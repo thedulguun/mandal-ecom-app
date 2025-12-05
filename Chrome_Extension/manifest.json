@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Mandal instagram helper",
+  "version": "1.0",
+  "description": "Internal IG helper: canned responses + orders + customer info",
+  "permissions": ["storage", "scripting", "activeTab"],
+  "host_permissions": [
+    "https://www.instagram.com/*",
+    "https://zmexhvaetfxrqsonrbzw.supabase.co/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.instagram.com/*"],
+      "js": ["contentScript.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

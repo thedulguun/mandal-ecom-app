@@ -1,0 +1,162 @@
+# Mandal Extension Chat History - 2025-12-03
+
+## PROJECT OVERVIEW
+Chrome extension for Instagram DM management with order tracking, draft system, and canned message shortcuts.
+
+## KEY FILES
+- contentScript.js: Main UI logic, modals, order/draft management
+- content.css: Extension styling, visual feedback
+- background.js: Service worker for Supabase API requests
+
+## RECENT FIXES COMPLETED
+
+### 1. Shortcuts Persistence Issue
+**Problem**: Canned message shortcuts forgotten on page refresh
+**Fix**: Converted chrome.storage.local.get() to async/await pattern in loadCannedResponses()
+```javascript
+const storageResult = await new Promise((resolve) => {
+  chrome.storage.local.get(["responseShortcuts"], (result) => {
+    resolve(result);
+  });
+});
+```
+
+### 2. Modal Text Contrast
+**Problem**: "Захиалга батлах" modal text too light
+**Fix**: Changed colors from #6b7280 to #1f2937 and #374151 (lines 194-207, contentScript.js)
+
+### 3. Current Draft Button Selection
+**Problem**: No visual feedback when Current Draft active
+**Fix**: Added .selected class with blue background (#eff6ff, #2563eb) in content.css (lines 370-378)
+**Fix**: Updated updateActionButtons() to toggle .selected class (lines 724-753)
+
+### 4. Order List Display
+**Problem**: Order ID more prominent than date
+**Fix**: Swapped positions (line 664-667), made date bold 13px, order_id smaller 9px gray
+
+### 5. Current Draft Selected on Refresh
+**Problem**: Button not selected when page loads
+**Fix**: Added updateActionButtons(panel) call in loadOrdersForCurrentThread() (line 762)
+
+### 6. Custom Delete Modal
+**Problem**: Using browser's default confirm() dialog
+**Fix**: Created showDeleteConfirmationModal() function (lines 321-407)
+- Shows order details (ID, date, name)
+- Red warning text, custom styling
+- Returns promise with user choice
+
+## CURRENT TASK - IN PROGRESS
+
+### Add Enter Key Support to Modals
+
+**User Request**: "when a modal is open, we should be able to hit enter to confirm. Also, on delete modals, make return the default action that performs when hitting enter. delete is the secondary button that we have to use mouse to hit."
+
+**Requirements**:
+- Order confirmation modal: Enter = confirm (create order)
+- Delete confirmation modal: Enter = CANCEL (safe default, not delete)
+
+**Implementation Needed**:
+
+1. **showOrderConfirmationModal** (around line 237-245):
+```javascript
+const keyHandler = (e) => {
+  if (e.key === "Escape") {
+    overlay.remove();
+    resolve(false);
+    document.removeEventListener("keydown", keyHandler);
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    overlay.remove();
+    document.removeEventListener("keydown", keyHandler);
+    resolve(true);  // Confirm order
+  }
+};
+document.addEventListener("keydown", keyHandler);
+```
+
+2. **showDeleteConfirmationModal** (around line 389-397):
+```javascript
+const keyHandler = (e) => {
+  if (e.key === "Escape" || e.key === "Enter") {
+    e.preventDefault();
+    overlay.remove();
+    resolve(false);  // Cancel (safe)
+    document.removeEventListener("keydown", keyHandler);
+  }
+};
+document.addEventListener("keydown", keyHandler);
+```
+
+**Error Encountered**: String replace found 2 matches (both modals have similar code). Need to update each separately.
+
+## TECHNICAL PATTERNS
+
+### State Management
+- Global vars: currentOrders, selectedOrderId, currentDraft, hasUnsavedChanges
+- selectedOrderId = null means viewing draft
+- selectedOrderId = number means editing existing order
+
+### Modal System
+- Custom overlay-based dialogs
+- Escape key closes modals
+- Click overlay to close
+- Promise-based for async confirmation
+
+### Auto-Save
+- Debounced 1 second delay
+- Updates draft in database
+- Triggers on form input changes
+
+### Event Delegation
+- Single listener on panel for dynamically created buttons
+- Uses target.id and closest() for routing
+
+### Chrome Storage
+- Async/await pattern for chrome.storage.local
+- Stores canned message shortcuts
+
+### Supabase Integration
+- bgRequest() wrapper for background.js communication
+- REST API endpoints for orders/drafts
+- Table: orders (id, order_id, ig_username, customer_name, phone, created_at)
+- Table: drafts (ig_username, customer_name, phone, updated_at)
+
+## ORDER ID FORMAT
+MND-YYMMDD-XXXXXX-RR
+- MND: Prefix
+- YYMMDD: Date
+- XXXXXX: Sequential number
+- RR: Retry counter (starts at 00)
+
+## BUTTON STATES
+
+### Current Draft Button
+- Default: Gray background
+- Selected: Blue background (#eff6ff), blue text (#2563eb)
+- Shows when: selectedOrderId === null
+
+### Action Buttons
+- Viewing draft: "Захиалга үүсгэх" (Create Order)
+- Editing order: "Өөрчлөлт хадгалах" (Save Changes) + "Захиалга Устгах" (Delete)
+
+## CSS CLASSES
+- .ig-modal-overlay: Modal backdrop
+- .ig-modal: Modal container
+- .ig-modal-btn-primary: Blue confirm button
+- .ig-modal-btn-danger: Red delete button
+- .ig-modal-btn-cancel: Gray cancel button
+- .selected: Active state for buttons
+- .ig-order-row.selected: Selected order in list
+
+## NEXT STEPS
+1. Complete Enter key support for both modals (current task)
+2. Test keyboard navigation thoroughly
+3. Verify safe default behavior on delete modal
+
+## GIT STATUS AT START
+M background.js
+M content.css
+M contentScript.js
+
+Branch: main
+Last commit: 0d614e6 first commit
