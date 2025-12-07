@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ebuuhia Dev Playground</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 16px; background: #0f172a; color: #e2e8f0; }
+    h1 { margin-top: 0; }
+    .card { background: #1e293b; padding: 16px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #334155; }
+    button { background: #38bdf8; color: #0f172a; border: none; padding: 10px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    button:hover { background: #0ea5e9; }
+    pre { background: #0b1224; padding: 12px; border-radius: 8px; overflow-x: auto; border: 1px solid #1f2937; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .footer { margin-top: 16px; font-size: 12px; color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <h1>Ebuuhia Dev Playground</h1>
+  <p>Call the dev server routes that proxy to library functions (currently mocked).</p>
+
+  <div class="card">
+    <div class="row">
+      <strong>Ping</strong>
+      <button onclick="callApi('/api/ping')">Ping</button>
+    </div>
+    <pre id="ping-output">—</pre>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <strong>Items</strong>
+      <button onclick="callApi('/api/items')">Fetch items</button>
+    </div>
+    <pre id="items-output">—</pre>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <strong>Deliveries</strong>
+      <button onclick="callApi('/api/deliveries')">Fetch deliveries</button>
+    </div>
+    <pre id="deliveries-output">—</pre>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <strong>Inventory</strong>
+      <button onclick="callApi('/api/inventory')">Fetch inventory</button>
+    </div>
+    <pre id="inventory-output">—</pre>
+  </div>
+
+  <div class="footer">Dev-only. Replace mocks with real library calls when available.</div>
+
+  <script>
+    async function callApi(path) {
+      const outputId = path.split('/').pop() + '-output';
+      const el = document.getElementById(outputId);
+      el.textContent = 'Loading...';
+      try {
+        const res = await fetch(path);
+        const data = await res.json();
+        el.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        el.textContent = 'Error: ' + err.message;
+      }
+    }
+  </script>
+</body>
+</html>

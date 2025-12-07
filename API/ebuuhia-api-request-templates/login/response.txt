@@ -1,0 +1,29 @@
+{
+    "user": {
+        "user_id": 2015,
+        "shop_name": "Мандал онлайн шоп1",
+        "email": "mandalbeauty@yahoo.com",
+        "first_name": "boldoo ",
+        "last_name": "saraa",
+        "driver_name": null,
+        "r_d": "УД04040404",
+        "phone": 99537771,
+        "phone1": 99537771,
+        "password": "$2b$10$3Atc1MHYXtnlqNyaA/bZVutklnRwA0s/7wsZGjpFxcktoBHgrIqKK",
+        "role": "customer",
+        "address": null,
+        "address1": null,
+        "car_number": null,
+        "car_type": null,
+        "type": null,
+        "bank_type": "Хаан банк",
+        "bank_num": "MN620005005176599539",
+        "bank_name": "Номун Мөнхбаатар",
+        "price": 6000,
+        "approve": 1,
+        "active": 1,
+        "token": "null"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY3VzdG9tZXIiLCJlbWFpbCI6Im1hbmRhbGJlYXV0eUB5YWhvby5jb20iLCJpYXQiOjE3NjUwNDY0NDMsImV4cCI6MTc2NTEwNjQ0M30.-FWDSqcmCSw8DscKsFyMdbaiqD4tkaDAYySI5E243QI",
+    "tokenExpTime": "2025-12-07 19:20"
+}

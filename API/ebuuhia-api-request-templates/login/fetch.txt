@@ -1,0 +1,21 @@
+fetch("https://api.ebuuhia.mn/api/v1/login", {
+  "headers": {
+    "accept": "application/json, text/plain, */*",
+    "accept-language": "mn",
+    "cache-control": "no-cache",
+    "content-type": "application/json",
+    "expires": "0",
+    "pragma": "no-cache",
+    "sec-ch-ua": "\"Google Chrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"macOS\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-site"
+  },
+  "referrer": "https://ebuuhia.mn/",
+  "body": "{\"email\":\"mandalbeauty@yahoo.com\",\"password\":\"12345678\",\"device_token\":null}",
+  "method": "POST",
+  "mode": "cors",
+  "credentials": "omit"
+});

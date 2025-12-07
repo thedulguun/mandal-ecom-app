@@ -1,0 +1,14 @@
+{
+{
+  "name": "mandal-ecom-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Dev-only harness and playground for the Ebuuhia integration library.",
+  "main": "dev-server.js",
+  "scripts": {
+    "dev-server": "node dev-server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

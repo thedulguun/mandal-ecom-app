@@ -1,0 +1,21 @@
+fetch("https://api.ebuuhia.mn/api/v1/getDeliveryCustomer?startLimit=0&endLimit=100&order=&sort=asc&search=&value=&status=100&id=2015&action=0", {
+  "headers": {
+    "accept": "application/json, text/plain, */*",
+    "accept-language": "mn",
+    "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY3VzdG9tZXIiLCJlbWFpbCI6Im1hbmRhbGJlYXV0eUB5YWhvby5jb20iLCJpYXQiOjE3NjUwNDY0NDMsImV4cCI6MTc2NTEwNjQ0M30.-FWDSqcmCSw8DscKsFyMdbaiqD4tkaDAYySI5E243QI",
+    "cache-control": "no-cache",
+    "expires": "0",
+    "pragma": "no-cache",
+    "sec-ch-ua": "\"Google Chrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"macOS\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-site"
+  },
+  "referrer": "https://ebuuhia.mn/",
+  "body": null,
+  "method": "GET",
+  "mode": "cors",
+  "credentials": "include"
+});
